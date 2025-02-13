@@ -1,24 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-export const Song = (props) => {
-    const [isPlaying, setIsPlaying] = useState(false);
-    const audioUrl = props.song.audio; // Assuming audio URL is available in props
-
-    const togglePlay = () => {
-        const audio = new Audio(audioUrl);
-        if (isPlaying) {
-            audio.pause();
-        } else {
-            audio.play();
-        }
-        setIsPlaying(!isPlaying);
-    };
-
-    return (
-        <div className="card">
-            <h3>{props.song.name}</h3>
-            <img src={props.song.image} alt={props.song.name} />
-            <button onClick={togglePlay}>{isPlaying ? 'Pause' : 'Play'}</button>
-        </div>
-    );
+const Song = ({ title, price, description, image }) => {
+  return (
+    <div className="card">
+      <img src={image} alt={title} />
+      <div className="card-body">
+        <h2>{title}</h2>
+        <p>{description}</p>
+        <p>Price: ${price}</p>
+      </div>
+    </div>
+  );
 };
+
+export default Song;

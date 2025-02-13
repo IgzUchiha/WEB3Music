@@ -5,70 +5,90 @@ import { SinglePage } from './SinglePage';
 import { EditPage } from './EditPage';
 import { DeletePage } from './DeletePage';
 import { Sidebar } from './Sidebar';
+import { Card } from './Card';
+import DisplaySong from './DisplaySong';
 
-// import and prepend the api url to any fetch calls
+// Import and prepend the api url to any fetch calls
 import apiURL from '../api';
 
 export const App = () => {
-	const [songs, setSongs] = useState([]);
-	const [displayAddPage, setDisplayAddPage] = useState(false);
-	const [displaySinglePage, setDisplaySinglePage] = useState(null);
-	const [editing, setEditing] = useState(false);
-	const [toEdit, setToEdit] = useState(null);
-	const [deletePage, setDeletePage] = useState(null);
+  const [songs, setSongs] = useState([]);
+  const [displayAddPage, setDisplayAddPage] = useState(false);
+  const [displaySinglePage, setDisplaySinglePage] = useState(null);
+  const [editing, setEditing] = useState(false);
+  const [toEdit, setToEdit] = useState(null);
+  const [deletePage, setDeletePage] = useState(null);
 
-	async function fetchSongs() {
-		try {
-			const response = await fetch(`${apiURL}/songs`);
-			const songsData = await response.json();
-			setSongs(songsData);
-		} catch (err) {
-			console.log("Oh no an error in fetchSongs! ", err);
-		}
-	}
+  useEffect(() => {
+    fetchSongs();
+  }, []);
 
-	async function fetchSingleSong(id) {
-		try {
-			const response = await fetch(`${apiURL}/songs/${id}`);
-			const singleSongData = await response.json();
-			setDisplaySinglePage(singleSongData);
-		} catch (err) {
-			console.log("Oh no an error in fetchSingleSong! ", err);
-		}
-	}
+  async function fetchSongs() {
+    try {
+      const response = await fetch(`${apiURL}/songs`);
+      const songsData = await response.json();
+      setSongs(songsData);
+    } catch (err) {
+      console.log("Oh no, an error occurred while fetching songs!", err);
+    }
+  }
 
-	function isEditing(song) {
-		setEditing(!editing);
-		setDisplaySinglePage(null);
-		setToEdit(song);
-		console.log(song);
-	}
+  async function fetchSingleSong(id) {
+    try {
+      const response = await fetch(`${apiURL}/songs/${id}`);
+      const singleSongData = await response.json();
+      setDisplaySinglePage(singleSongData);
+    } catch (err) {
+      console.log("Oh no, an error occurred while fetching the single song!", err);
+    }
+  }
 
-	useEffect(() => {
-		fetchSongs();
-	}, []);
+  function handleEdit(song) {
+    setEditing(true);
+    setDisplaySinglePage(null);
+    setToEdit(song);
+  }
 
-	return (
-		<main>
-			<div>
-				<Sidebar />
-			</div>
-			<div className='main'>
-				{displayAddPage ? (
-					<AddPage setDisplayAddPage={setDisplayAddPage} fetchSongs={fetchSongs} />
-				) : displaySinglePage ? (
-					<SinglePage isEditing={isEditing} setDeletePage={setDeletePage} fetchSongs={fetchSongs} displaySinglePage={displaySinglePage} setDisplaySinglePage={setDisplaySinglePage} />
-				) : editing ? (
-					<EditPage fetchSongs={fetchSongs} toEdit={toEdit} setEditing={setEditing} />
-				) : deletePage ? (
-					<DeletePage fetchSongs={fetchSongs} deletePage={deletePage} setDeletePage={setDeletePage} />
-				) : (
-					<>
-						<SongList songs={songs} fetchSingleSong={fetchSingleSong} />
-						<button onClick={() => setDisplayAddPage(true)}>Add Song</button>
-					</>
-				)}
-			</div>
-		</main>
-	);
+  return (
+    <main>
+      <div>
+        <Sidebar />
+      </div>
+      <div className="main">
+        {displayAddPage ? (
+          <AddPage setDisplayAddPage={setDisplayAddPage} fetchSongs={fetchSongs} />
+        ) : displaySinglePage ? (
+          <SinglePage
+            handleEdit={handleEdit}
+            setDeletePage={setDeletePage}
+            fetchSongs={fetchSongs}
+            displaySinglePage={displaySinglePage}
+            setDisplaySinglePage={setDisplaySinglePage}
+          />
+        ) : editing ? (
+          <EditPage fetchSongs={fetchSongs} toEdit={toEdit} setEditing={setEditing} />
+        ) : deletePage ? (
+          <DeletePage fetchSongs={fetchSongs} deletePage={deletePage} setDeletePage={setDeletePage} />
+        ) : (
+          <>
+            <DisplaySong />
+            <SongList songs={songs} fetchSingleSong={fetchSingleSong} />
+            <button onClick={() => setDisplayAddPage(true)}>Add Song</button>
+            <div>
+              <h1 className="heading">All Songs</h1>
+              {songs.map((song, index) => (
+                <Card
+                  key={index}
+                  title={song.title}
+                  price={song.price}
+                  description={song.description}
+                  image={song.image}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </main>
+  );
 };
